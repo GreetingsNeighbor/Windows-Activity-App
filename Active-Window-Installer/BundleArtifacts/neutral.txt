@@ -1,0 +1,2 @@
+MainPackage=C:\Users\autoe\source\repos\Active-Window-App\Active-Window-Installer\bin\AnyCPU\Debug\Active-Window-Installer_1.0.0.0_AnyCPU_Debug.msix
+SymbolPackage=C:\Users\autoe\source\repos\Active-Window-App\Active-Window-Installer\obj\Debug\Symbols\Active-Window-Installer_1.0.0.0_AnyCPU_Debug.appxsym

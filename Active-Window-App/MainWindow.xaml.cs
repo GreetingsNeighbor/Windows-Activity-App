@@ -92,38 +92,37 @@ namespace Active_Window_App
                     browser = "brave";
 
                     url = GetBraveUrl(hwnd);
-                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
-                    return;
+
+
                 }
                 else if (title.Contains("- Google Chrome"))
                 {
                     browser = "chrome";
                     url = GetChromeUrl(hwnd);
-                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
-                    return;
+
+
                 }
                 else if (title.Contains("- Microsoft?"))
                 {
                     browser = "edge";
-                }else if (title.Contains("— Mozilla Firefox"))
+                    url = GetEdgeUrl(hwnd);
+
+                }
+                else if (title.Contains("— Mozilla Firefox"))
                 {
                     browser = "firefox";
-                    url =GetFirefoxUrl(hwnd);
-                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
-                    return;
+                    url = GetFirefoxUrl(hwnd);
                 }
                 if (!string.IsNullOrEmpty(browser))
                 {
-                    
-                    //if (string.IsNullOrEmpty(url))
-                 
+
+                    if (string.IsNullOrEmpty(url))
                         url = GetBrowsedUrlFromHwnd(hwnd).ToString();
-                        if (string.IsNullOrEmpty(url))
-                        {
-                            url = "No Property for Doc:" + searchBrowserForUrl(browser);
-                        }
-                        
-           
+                    if (string.IsNullOrEmpty(url))
+                    {
+                        url = "No Property for Doc:" + searchBrowserForUrl(browser);
+                    }
+
                     Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
                 }
                 else
@@ -134,21 +133,48 @@ namespace Active_Window_App
 
 
         }
+        public string GetEdgeUrl(IntPtr hwnd)
+        {
+            AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
+
+            AutomationElement col = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.NameProperty, "Microsoft Edge"));
+            if (col == null)
+            {
+                return "Empty url 0000";
+            }
+
+            col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar));
+            col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
 
 
-  
+            string url = (string)col.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+            if (string.IsNullOrEmpty(url))
+            {
+                return "Empty url 0001";
+            }
+            return url;
+        }
+
+
         public string GetFirefoxUrl(IntPtr hwnd)
         {
             AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
-       
+            element.SetFocus();
             AutomationElement col = element.FindFirst(TreeScope.Subtree, new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar), new PropertyCondition(AutomationElement.NameProperty, "Navigation")));
+            if (col == null)
+            {
+                return "Empty url 0000";
+            }
 
             col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox));
             col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
 
 
             string url = (string)col.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
-
+            if (string.IsNullOrEmpty(url))
+            {
+                return "Empty url 0001";
+            }
             return url;
         }
         public string GetChromeUrl(IntPtr hwnd)
@@ -157,7 +183,7 @@ namespace Active_Window_App
             AutomationElement col = element.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Google Chrome"));
             if (col == null)
             {
-                return "Empty Url 0000";
+                return "Empty url 0000";
             }
             col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar));
 
@@ -172,7 +198,7 @@ namespace Active_Window_App
             Console.WriteLine(url);
             if (string.IsNullOrEmpty(url))
             {
-                return "Empty Url 0001";
+                return "Empty url 0001";
             }
 
             return url;
@@ -180,26 +206,39 @@ namespace Active_Window_App
         public string GetBraveUrl(IntPtr hwnd)
         {
             AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
-            Console.WriteLine(element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty).ToString());
+                                                                             //Console.WriteLine(element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty).ToString());
+                                                                             //CacheRequest cacheRequest = new CacheRequest();
+                                                                             //cacheRequest.AutomationElementMode = AutomationElementMode.Full;
 
-            AutomationElement col = element.FindFirst(TreeScope.Children,  new PropertyCondition(AutomationElement.NameProperty, "Brave"));
+            //// Cache all elements, regardless of whether they are control or content elements.
+            //cacheRequest.TreeFilter = Automation.ContentViewCondition;
+
+            //// Property and pattern to cache.
+            //cacheRequest.Add(AutomationElement.NameProperty);
+            ////cacheRequest.Pop();
+            //cacheRequest.Push();
+            ////cacheRequest.Add(SelectionItemPattern.Pattern);
+
+
+            AutomationElement col = element.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Brave"));
             if (col == null)
             {
-                return "Empty Url 0000";
+                return "Empty url 0000";
             }
+
             AutomationElement col1 = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
             //col1 = col1.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Custom));
             if (col1 == null)
             {
                 return "Unable to locate address and search bar";
             }
-
+            //cacheRequest.Pop();
             string url = (string)col1.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
 
             Console.WriteLine(url);
             if (string.IsNullOrEmpty(url))
             {
-                return "Empty Url 0001";
+                return "Empty url 0001";
             }
 
             return url;
@@ -217,11 +256,11 @@ namespace Active_Window_App
             if (element == null)
                 return "ele";
 
-            AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
+            AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
 
             //doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
 
-       
+
 
             //if ((bool)doc.GetCurrentPropertyValue(AutomationElement.HasKeyboardFocusProperty))
             //{
@@ -231,7 +270,7 @@ namespace Active_Window_App
 
             if (doc != null)
                 rString = (string)element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
-            
+
             if (doc == null)
             {
                 return "";
@@ -257,10 +296,12 @@ namespace Active_Window_App
             string url = "";
             for (int i = 0; i < processes.Length; i++)
             {
-                Process process2 = processes[i];
-                if (process2.MainWindowHandle == IntPtr.Zero)
+                Process p = processes[i];
+                if (p.MainWindowHandle == IntPtr.Zero)
                     continue;
-                url = getProcessUrl(process2).ToString();
+
+        
+                    url = getProcessUrl(p).ToString();
                 if (!string.IsNullOrEmpty(url) && url != "zero" && url != "No Property for Doc from Process Search")
                     return url;
             }
@@ -270,30 +311,30 @@ namespace Active_Window_App
         {
             Console.Write(process.ProcessName);
 
-                if (process == null)
-                    throw new ArgumentNullException("process");
+            if (process == null)
+                throw new ArgumentNullException("process");
 
-                if (process.MainWindowHandle == IntPtr.Zero)
-                    return "zero";
+            if (process.MainWindowHandle == IntPtr.Zero)
+                return "No hwnd";
 
-                AutomationElement element = AutomationElement.FromHandle(process.MainWindowHandle);
-                if (element == null)
-                    return "ele";
+            AutomationElement element = AutomationElement.FromHandle(process.MainWindowHandle);
+            if (element == null)
+                return "No element from hwnd";
 
 
-                //AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
+            //AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
 
-                AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
-                if (doc == null)
-                    return "No Property for Doc from Process Search";
+            AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
+            if (doc == null)
+                return "No Property for Doc from Process Search";
 
-                if (doc != null)
-                    return (string)doc.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+            if (doc != null)
+                return (string)doc.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
 
             return "";
 
-               
-        
+
+
 
             //else
             //{
@@ -313,7 +354,7 @@ namespace Active_Window_App
             //    string result = ((ValuePattern)edit.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
             //    return result;
             //}
-        
+
 
         }
 
