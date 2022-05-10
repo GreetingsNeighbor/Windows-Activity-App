@@ -78,6 +78,7 @@ namespace Active_Window_App
 
         private void GetTitleAndUrl(IntPtr hwnd)
         {
+            string url = "";
             string title = GetActiveWindowTitle();
             if (title == null)
                 return;
@@ -86,29 +87,47 @@ namespace Active_Window_App
             {
 
                 prevTitle = title;
-                Console.WriteLine("test");
                 if (title.Contains("- Brave"))
                 {
                     browser = "brave";
+
+                    url = GetBraveUrl(hwnd);
+                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
+                    return;
                 }
                 else if (title.Contains("- Google Chrome"))
                 {
                     browser = "chrome";
+                    url = GetChromeUrl(hwnd);
+                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
+                    return;
                 }
                 else if (title.Contains("- Microsoft?"))
                 {
                     browser = "edge";
+                }else if (title.Contains("— Mozilla Firefox"))
+                {
+                    browser = "firefox";
+                    url =GetFirefoxUrl(hwnd);
+                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
+                    return;
                 }
                 if (!string.IsNullOrEmpty(browser))
                 {
-                    string url = "";
+                    
                     //if (string.IsNullOrEmpty(url))
-
-                    url = GetBrowsedUrlFromHwnd(hwnd, browser).ToString();
-                    Log.Text = GetActiveWindowTitle() + "\r\n\t" + url + "\r\n" + Log.Text;
+                 
+                        url = GetBrowsedUrlFromHwnd(hwnd).ToString();
+                        if (string.IsNullOrEmpty(url))
+                        {
+                            url = "No Property for Doc:" + searchBrowserForUrl(browser);
+                        }
+                        
+           
+                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
                 }
                 else
-                    Log.Text = GetActiveWindowTitle() + "\r\n" + Log.Text;
+                    Log.Text = title + "\r\n" + Log.Text;
 
                 return;
             }
@@ -117,25 +136,81 @@ namespace Active_Window_App
         }
 
 
-        private string searchBrowserForUrl(string name)
+  
+        public string GetFirefoxUrl(IntPtr hwnd)
         {
-            Process[] processes = Process.GetProcessesByName(name);
-            string url = "";
-            for (int i = 0; i < processes.Length; i++)
-            {
-                Process process2 = processes[i];
-                if (process2.MainWindowHandle == IntPtr.Zero)
-                    continue;
-                url = getProcessUrl(process2).ToString();
-                if (!string.IsNullOrEmpty(url) && url != "zero" && url != "No Property for Doc From Process Search")
-                    return url;
-            }
-            return "No Url Located";
+            AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
+       
+            AutomationElement col = element.FindFirst(TreeScope.Subtree, new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar), new PropertyCondition(AutomationElement.NameProperty, "Navigation")));
+
+            col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox));
+            col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
+
+
+            string url = (string)col.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+
+            return url;
         }
-
-
-        public string GetBrowsedUrlFromHwnd(IntPtr hwnd, string browser)
+        public string GetChromeUrl(IntPtr hwnd)
         {
+            AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
+            AutomationElement col = element.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Google Chrome"));
+            if (col == null)
+            {
+                return "Empty Url 0000";
+            }
+            col = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ToolBar));
+
+            AutomationElement col1 = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
+            if (col1 == null)
+            {
+                return "Unable to locate address and search bar";
+            }
+
+            string url = (string)col1.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+
+            Console.WriteLine(url);
+            if (string.IsNullOrEmpty(url))
+            {
+                return "Empty Url 0001";
+            }
+
+            return url;
+        }
+        public string GetBraveUrl(IntPtr hwnd)
+        {
+            AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
+            Console.WriteLine(element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty).ToString());
+
+            AutomationElement col = element.FindFirst(TreeScope.Children,  new PropertyCondition(AutomationElement.NameProperty, "Brave"));
+            if (col == null)
+            {
+                return "Empty Url 0000";
+            }
+            AutomationElement col1 = col.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
+            //col1 = col1.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Custom));
+            if (col1 == null)
+            {
+                return "Unable to locate address and search bar";
+            }
+
+            string url = (string)col1.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+
+            Console.WriteLine(url);
+            if (string.IsNullOrEmpty(url))
+            {
+                return "Empty Url 0001";
+            }
+
+            return url;
+        }
+        public void findAllNameProperty(AutomationElementCollection col)
+        {
+
+        }
+        public string GetBrowsedUrlFromHwnd(IntPtr hwnd)
+        {
+
             string rString = "";
             if (hwnd == IntPtr.Zero || hwnd == null) { return "No Pointer"; }
             AutomationElement element = AutomationElement.FromHandle(hwnd);
@@ -144,29 +219,23 @@ namespace Active_Window_App
 
             AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
 
-
-
             //doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
 
-            if (doc == null)
-            {
-                string url = "";
-                //if (hwnd == IntPtr.Zero)
-                //{ 
+       
 
-                url = searchBrowserForUrl(browser);
-                //}
-                return "No Property for Doc:" + url;
-            }
-
-            if ((bool)doc.GetCurrentPropertyValue(AutomationElement.HasKeyboardFocusProperty))
-            {
-                return "keyboard";
-            }
+            //if ((bool)doc.GetCurrentPropertyValue(AutomationElement.HasKeyboardFocusProperty))
+            //{
+            //    return "keyboard";
+            //}
 
 
             if (doc != null)
                 rString = (string)element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
+            
+            if (doc == null)
+            {
+                return "";
+            }
 
             if (String.IsNullOrEmpty(rString))
             {
@@ -182,11 +251,25 @@ namespace Active_Window_App
 
 
         }
+        private string searchBrowserForUrl(string name)
+        {
+            Process[] processes = Process.GetProcessesByName(name);
+            string url = "";
+            for (int i = 0; i < processes.Length; i++)
+            {
+                Process process2 = processes[i];
+                if (process2.MainWindowHandle == IntPtr.Zero)
+                    continue;
+                url = getProcessUrl(process2).ToString();
+                if (!string.IsNullOrEmpty(url) && url != "zero" && url != "No Property for Doc from Process Search")
+                    return url;
+            }
+            return "No Url Located";
+        }
         public string getProcessUrl(Process process)
         {
             Console.Write(process.ProcessName);
-            if (process.ProcessName.ToLower() == "brave")
-            {
+
                 if (process == null)
                     throw new ArgumentNullException("process");
 
@@ -198,39 +281,19 @@ namespace Active_Window_App
                     return "ele";
 
 
-                //string nameProp1;
-                //object namePropNoDefault =
-                //    element.GetCurrentPropertyValue(AutomationElement.NameProperty, false);
-                //if (namePropNoDefault == AutomationElement.NotSupported)
-                //{
-                //    nameProp1 = "No name.";
-                //}
-                //else
-                //{
-                //    nameProp1 = namePropNoDefault as string;
-                //}
-                //Console.WriteLine(nameProp1 + "dsdsd " + namePropNoDefault);
                 //AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
 
                 AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
                 if (doc == null)
-                    return "No Property for Docz";
+                    return "No Property for Doc from Process Search";
 
                 if (doc != null)
                     return (string)doc.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty);
 
+            return "";
 
-                //AutomationPattern[] patterns = doc.GetSupportedPatterns();
-                //if(patterns.Length == 0)
-                //{
-                //    return "z";
-                //}else
-                //{
-                //    Console.WriteLine("completing");
-                //}
-
-                //return ((ValuePattern)doc.GetCurrentPattern(patterns[0])).Current.Value as string;
-            }
+               
+        
 
             //else
             //{
@@ -250,7 +313,7 @@ namespace Active_Window_App
             //    string result = ((ValuePattern)edit.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
             //    return result;
             //}
-            return "Other";
+        
 
         }
 
