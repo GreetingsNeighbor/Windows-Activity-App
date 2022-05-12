@@ -16,11 +16,15 @@
 * test gRPC from localhost
 * refactor into classes for abstraction
 * refactor using delegates and threading
+
+# Setup
+* Nuget Manager add sqlite-net-plc
   
 # Useful tools and links  
 * https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/modernize-wpf-tutorial-5  
 * Accessibility Insights to locate ui automation elements https://accessibilityinsights.io/  
 * https://www.youtube.com/watch?v=4t2TI8ImwMY helpful guide for creating installer
+* https://github.com/praeclarum/sqlite-net/wiki
   
 # How to use my installer if you're using my installer
 * If you're using my certificate to install note the thumbprint is 67ca74718a531822b406ead0ecc6f180b1f881ed  

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using SQLite;
 
-public class Class1
+public class Activity
 {
-	public Class1()
-	{
-	}
+
+        [PrimaryKey, AutoIncrement]
+		public int Id { get; set; }
+        public string Title { get; set; }
+        public string Url { get; set; }
 }
