@@ -205,20 +205,7 @@ namespace Active_Window_App
         }
         public string GetBraveUrl(IntPtr hwnd)
         {
-            AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
-                                                                             //Console.WriteLine(element.GetCurrentPropertyValue(ValuePatternIdentifiers.ValueProperty).ToString());
-                                                                             //CacheRequest cacheRequest = new CacheRequest();
-                                                                             //cacheRequest.AutomationElementMode = AutomationElementMode.Full;
-
-            //// Cache all elements, regardless of whether they are control or content elements.
-            //cacheRequest.TreeFilter = Automation.ContentViewCondition;
-
-            //// Property and pattern to cache.
-            //cacheRequest.Add(AutomationElement.NameProperty);
-            ////cacheRequest.Pop();
-            //cacheRequest.Push();
-            ////cacheRequest.Add(SelectionItemPattern.Pattern);
-
+            AutomationElement element = AutomationElement.FromHandle(hwnd); 
 
             AutomationElement col = element.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Brave"));
             if (col == null)
@@ -258,14 +245,6 @@ namespace Active_Window_App
 
             AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
 
-            //doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
-
-
-
-            //if ((bool)doc.GetCurrentPropertyValue(AutomationElement.HasKeyboardFocusProperty))
-            //{
-            //    return "keyboard";
-            //}
 
 
             if (doc != null)
@@ -321,9 +300,6 @@ namespace Active_Window_App
             if (element == null)
                 return "No element from hwnd";
 
-
-            //AutomationElement doc = element.FindFirst(TreeScope.Subtree, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Document));
-
             AutomationElement doc = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.NameProperty, "Address and search bar"));
             if (doc == null)
                 return "No Property for Doc from Process Search";
@@ -333,27 +309,6 @@ namespace Active_Window_App
 
             return "";
 
-
-
-
-            //else
-            //{
-            //    if (process == null)
-            //        throw new ArgumentNullException("process");
-
-            //    if (process.MainWindowHandle == IntPtr.Zero)
-            //        return null;
-
-            //    AutomationElement element = AutomationElement.FromHandle(process.MainWindowHandle);
-            //    if (element == null)
-            //        return null;
-
-            //    AutomationElement edit = element.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
-
-
-            //    string result = ((ValuePattern)edit.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
-            //    return result;
-            //}
 
 
         }
