@@ -4,18 +4,23 @@
   
 # What does app do?
 * Helping determine how much time you're spending on applications without sharing your data to third parties.
-* Categorizing applications to productivity vs distraction vs recreation  
+* Assist in categorization of applications for productivity vs distraction vs recreation metrics.
 * Aggregation of data for benchmarking and improvements  
-  
-  
+
+## Features
+* Easy Installer
+* Uses SQLite Database
+* Local solution
+* Active window detection  
   
   
 # Todo  
-* add database
 * add gRPC
 * test gRPC from localhost
 * refactor into classes for abstraction
 * refactor using delegates and threading
+* securing sqlite datbase https://www.sqlite.org/src/doc/trunk/ext/userauth/user-auth.txt  
+* Intelligent activity classification
 
 # Setup
 * Nuget Manager add sqlite-net-plc
@@ -24,7 +29,11 @@
 * https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/modernize-wpf-tutorial-5  
 * Accessibility Insights to locate ui automation elements https://accessibilityinsights.io/  
 * https://www.youtube.com/watch?v=4t2TI8ImwMY helpful guide for creating installer
-* https://github.com/praeclarum/sqlite-net/wiki
+* https://github.com/praeclarum/sqlite-net/wiki  
+* https://timheuer.com/blog/updated-how-to-using-sqlite-from-windows-store-apps  
+* https://marketplace.visualstudio.com/items?itemName=ErikEJ.SQLServerCompactSQLiteToolbox  
+* https://grpc.io/docs/languages/csharp/basics/  
+
   
 # How to use my installer if you're using my installer
 * If you're using my certificate to install note the thumbprint is 67ca74718a531822b406ead0ecc6f180b1f881ed  

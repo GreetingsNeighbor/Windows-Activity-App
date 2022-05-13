@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ActiveModules;
 
 namespace Active_Window_App
 {
@@ -24,16 +26,21 @@ namespace Active_Window_App
     /// </summary>.
     /// 
     public delegate void Del(IntPtr hwnd);
-
+   
     public partial class MainWindow : Window
     {
         WinEventDelegate winDel = null;
         string prevTitle = "";
-
+        public List<LimitedActivity> limitedActivity = new List<LimitedActivity>();
+        SQLiteManager sqLiteManager = null;
+        bool _isDataGridSet = false;
         public MainWindow()
         {
             InitializeComponent();
+            sqLiteManager = new SQLiteManager();
+            sqLiteManager.CreateActivityTable();
             winDel = new WinEventDelegate(WinEventProc);
+       
             IntPtr _eventHook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_OBJECT_NAMECHANGE, IntPtr.Zero, winDel, 0, 0, WINEVENT_OUTOFCONTEXT);
         }
 
@@ -58,7 +65,7 @@ namespace Active_Window_App
         {
             if (hwnd == IntPtr.Zero)
                 return;
-            GetTitleAndUrl(hwnd);
+            GetTitleAndUrl(hwnd,DateTime.Now);
         }
 
         private string GetActiveWindowTitle()
@@ -67,7 +74,7 @@ namespace Active_Window_App
             IntPtr handle = IntPtr.Zero;
             StringBuilder Buff = new StringBuilder(nChars);
             handle = GetForegroundWindow();
-
+      
             if (GetWindowText(handle, Buff, nChars) > 0)
             {
                 return Buff.ToString();
@@ -76,7 +83,7 @@ namespace Active_Window_App
         }
 
 
-        private void GetTitleAndUrl(IntPtr hwnd)
+        private void GetTitleAndUrl(IntPtr hwnd, DateTime dt)
         {
             string url = "";
             string title = GetActiveWindowTitle();
@@ -113,6 +120,7 @@ namespace Active_Window_App
                     browser = "firefox";
                     url = GetFirefoxUrl(hwnd);
                 }
+      
                 if (!string.IsNullOrEmpty(browser))
                 {
 
@@ -122,17 +130,36 @@ namespace Active_Window_App
                     {
                         url = "No Property for Doc:" + searchBrowserForUrl(browser);
                     }
-
-                    Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
+         
+                    
+    
+                    //Log.Text = title + "\r\n\t" + url + "\r\n" + Log.Text;
                 }
-                else
-                    Log.Text = title + "\r\n" + Log.Text;
+                
+                    //Log.Text = title + "\r\n" + Log.Text;
+
+                Activity activity = new Activity();
+                activity.Title = title;
+                activity.Url = url;
+                activity.Time = dt.ToString();
+                sqLiteManager.SaveActivity(activity);
+                limitedActivity =sqLiteManager.SelectNumActivity(5);
+                DataTable dataTable = new DataTable();
+
+
+                
+       
+                    dataGrid.ItemsSource = limitedActivity;
+                    dataGrid.Columns[1].Width = 300;
+                    dataGrid.Columns[2].Width = 200;
+          
 
                 return;
             }
 
 
         }
+
         public string GetEdgeUrl(IntPtr hwnd)
         {
             AutomationElement element = AutomationElement.FromHandle(hwnd);  // intPtr is the MainWindowHandle for FireFox browser
@@ -316,6 +343,17 @@ namespace Active_Window_App
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+          
+   
+        }
+
+        private void Window_Unloaded(object sender, RoutedEventArgs e)
+        {
+            sqLiteManager.CloseConn();
         }
     }
 

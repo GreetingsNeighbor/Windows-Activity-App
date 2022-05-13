@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SQLite;
-
+using ActiveModules;
 
 
 namespace Active_Window_App
@@ -24,6 +24,7 @@ namespace Active_Window_App
             CreateActivityTable();
         }
 
+
         public void CreateActivityTable()
         {
             using (SQLiteConnection conn = new SQLiteConnection(_dbPath))
@@ -36,13 +37,30 @@ namespace Active_Window_App
                 conn.Query<Object>("SELECT name FROM sqlite_master WHERE type = 'table' AND name='"+ tablename+"'");
             return true;
         }
-        public void SaveActivity(string dbPath)
+        public void SaveActivity(Activity activity)
         {
-            Activity activity = new Activity();
+ 
             using (SQLiteConnection conn = new SQLiteConnection(_dbPath))
                 conn.Insert(activity);
             
        
+        }
+        public List<LimitedActivity> SelectNumActivity(int num)
+        {
+
+            using (SQLiteConnection conn = new SQLiteConnection(_dbPath))
+            {
+                string q = "Select time, title, url from activity ORDER BY id desc LIMIT " + num;
+                return conn.Query<LimitedActivity>(q);
+            }
+        }
+
+        internal void CloseConn()
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(_dbPath))
+            {
+                conn.Close();
+            }
         }
     }
 
